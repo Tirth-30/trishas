@@ -17,7 +17,7 @@ document.querySelector('#app').innerHTML = `
       </nav>
 
       <div class="header-actions">
-        <a href="#contact" class="btn btn-primary">Book Consultation <span class="material-icons-outlined">arrow_forward</span></a>
+        <a href="#" class="btn btn-primary open-booking-modal">Book Consultation <span class="material-icons-outlined">arrow_forward</span></a>
         <button class="mobile-menu-btn" aria-label="Toggle menu">
           <span class="material-icons-outlined">menu</span>
         </button>
@@ -37,7 +37,7 @@ document.querySelector('#app').innerHTML = `
           <p class="hero-subtitle">Led by Dr. Krunal Tralsawala, offering advanced medical dermatology and cosmetic treatments customized for your skin's unique needs.</p>
           
           <div class="hero-cta-group">
-            <a href="#contact" class="btn btn-primary">
+            <a href="#" class="btn btn-primary open-booking-modal">
               Book Your Visit (₹500)
             </a>
             <div class="clinic-hours">
@@ -221,16 +221,149 @@ document.querySelector('#app').innerHTML = `
        <p>&copy; 2026 Trisha Skin & Cosmetic Clinic. All rights reserved.</p>
     </div>
   </footer>
+
+  <!-- Booking Modal -->
+  <div class="modal-overlay" id="bookingModal">
+    <div class="modal">
+      <button class="modal-close" id="closeModal" aria-label="Close">
+        <span class="material-icons-outlined">close</span>
+      </button>
+      <div class="modal-header">
+        <h2>Book a Consultation</h2>
+        <p>Fill in your details and we'll confirm your appointment.</p>
+      </div>
+      <form id="bookingForm" class="booking-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="patientName">Full Name <span class="required">*</span></label>
+            <input type="text" id="patientName" name="patientName" placeholder="Enter your full name" required />
+          </div>
+          <div class="form-group">
+            <label for="patientPhone">Phone Number <span class="required">*</span></label>
+            <input type="tel" id="patientPhone" name="patientPhone" placeholder="e.g. 088666 77746" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="patientEmail">Email Address</label>
+          <input type="email" id="patientEmail" name="patientEmail" placeholder="your@email.com (optional)" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="preferredDate">Preferred Date <span class="required">*</span></label>
+            <input type="date" id="preferredDate" name="preferredDate" required />
+          </div>
+          <div class="form-group">
+            <label for="preferredTime">Preferred Time</label>
+            <select id="preferredTime" name="preferredTime">
+              <option value="">Select a time slot</option>
+              <option value="5:00 PM">5:00 PM</option>
+              <option value="5:30 PM">5:30 PM</option>
+              <option value="6:00 PM">6:00 PM</option>
+              <option value="6:30 PM">6:30 PM</option>
+              <option value="7:00 PM">7:00 PM</option>
+              <option value="7:30 PM">7:30 PM</option>
+              <option value="8:00 PM">8:00 PM</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="serviceType">Service / Concern</label>
+          <select id="serviceType" name="serviceType">
+            <option value="">Select a concern (optional)</option>
+            <option value="General Dermatology">General Dermatology Consultation</option>
+            <option value="Acne Treatment">Acne Treatment</option>
+            <option value="Acne Scar Treatment">Acne Scar / Microneedling</option>
+            <option value="Pigmentation">Pigmentation Treatment</option>
+            <option value="Anti-Ageing">Anti-Ageing Treatment</option>
+            <option value="Laser Hair Removal">Laser Hair Removal</option>
+            <option value="Laser Skin Therapy">Laser Skin Therapy</option>
+            <option value="Hair Transplant">Hair Transplant Consultation</option>
+            <option value="Chemical Peel">Chemical Peel</option>
+            <option value="Skin Rejuvenation">Skin Rejuvenation</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="patientMessage">Additional Notes</label>
+          <textarea id="patientMessage" name="patientMessage" rows="3" placeholder="Briefly describe your concern or any questions..."></textarea>
+        </div>
+        <div class="form-footer">
+          <p class="fee-note"><span class="material-icons-outlined">info</span> Consultation fee: ₹500 | Mon-Sat, 5:00 PM – 8:30 PM</p>
+          <button type="submit" class="btn btn-primary btn-submit">Confirm Booking <span class="material-icons-outlined">check_circle</span></button>
+        </div>
+      </form>
+      <div class="form-success" id="formSuccess" style="display:none;">
+        <span class="material-icons-outlined success-icon">task_alt</span>
+        <h3>Booking Request Sent!</h3>
+        <p>Thank you! We'll contact you shortly to confirm your appointment.</p>
+        <button class="btn btn-secondary" id="closeSuccessModal">Close</button>
+      </div>
+    </div>
+  </div>
 `
 
 // Smooth Scroll for anchor links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function (e) {
-    if (this.getAttribute('href') !== '#') {
+    if (this.getAttribute('href') !== '#' && !this.classList.contains('open-booking-modal')) {
       e.preventDefault();
       document.querySelector(this.getAttribute('href')).scrollIntoView({
         behavior: 'smooth'
       });
     }
   });
+});
+
+// Booking Modal Logic
+const modal = document.getElementById('bookingModal');
+const closeBtn = document.getElementById('closeModal');
+const bookingForm = document.getElementById('bookingForm');
+const formSuccess = document.getElementById('formSuccess');
+const closeSuccessBtn = document.getElementById('closeSuccessModal');
+
+function openModal() {
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  // Set minimum date to today
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('preferredDate').setAttribute('min', today);
+}
+
+function closeModal() {
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+  // Reset form after closing
+  setTimeout(() => {
+    bookingForm.style.display = '';
+    formSuccess.style.display = 'none';
+    bookingForm.reset();
+  }, 300);
+}
+
+// Open modal on all booking buttons
+document.querySelectorAll('.open-booking-modal').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    openModal();
+  });
+});
+
+// Close modal
+closeBtn.addEventListener('click', closeModal);
+closeSuccessBtn.addEventListener('click', closeModal);
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) closeModal();
+});
+
+// Close on Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
+});
+
+// Form submission
+bookingForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  // Show success message
+  bookingForm.style.display = 'none';
+  formSuccess.style.display = 'flex';
 });
